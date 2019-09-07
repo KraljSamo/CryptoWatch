@@ -7,7 +7,7 @@ from email.mime.text import MIMEText
 
 class Notifier:
 
-    def __init__(self, smtp, port):
+    def __init__(self, smtp='smtp-mail.outlook.com', port=587):
         load_dotenv()
         self.username = os.getenv('EMAIL_USERNAME')
         self.password = os.getenv('PASSWORD')
@@ -30,5 +30,6 @@ class Notifier:
 
             server.send_message(msg)
 
-notifier = Notifier('smtp-mail.outlook.com', 587)
-notifier.send_email('This is a test email!', 'Test email - do not delete')
+if __name__ == '__main__':
+    notifier = Notifier('smtp-mail.outlook.com', 587)
+    notifier.send_email('This is a test email!', 'Test email - do not delete')
