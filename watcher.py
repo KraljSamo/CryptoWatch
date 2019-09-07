@@ -28,12 +28,16 @@ class Watcher():
             pass
     
     def get_top_100(self):
+        
         url = '/coins/markets'
         params = {'vs_currency' : 'usd'}
 
         coin_data = self.call_coingecko_api(url, params)
 
-        return coin_data
+        ids = [coin['id'] for coin in coin_data]
+        self.top100 = ids
+        
+        return ids
     
     def save(self, outfile_name='price_history.json'):
         with open(outfile_name, 'w') as outfile:
@@ -47,26 +51,42 @@ class Watcher():
             print(e)
             return False
 
+    def update_prices(self):
+    
+        url = '/simple/price'
+        params = {
+            'ids' : ','.join(self.top100),
+            'vs_currencies' : 'usd'
+        }
+
+        prices = self.call_coingecko_api(url, params)
+
+        current_time = datetime.datetime.now()
+        current_time = current_time.replace(second=0, microsecond=0)
+
+        for coin, value in prices.items():
+            self.crypto_data[coin].append((current_time, value['usd']))
+            print(coin, self.crypto_data[coin])
+
+        return prices
+
     def check_prices(self):
         pass
 
     def run(self):
         
         while True:
-            time.sleep(5)
             try:
-                x = 5
-                print(x)
-                print(1/0)
+                self.update_prices()
             except KeyboardInterrupt:
                 break
             except Exception as e:
                 print(e)
 
+            time.sleep(60)
+
 
 if __name__ == '__main__':
     w = Watcher()
-    res = w.call_coingecko_api('/coins/markets', {'vs_currency' : 'usd'})
-    print(res)
-
-
+    # res = w.call_coingecko_api('/coins/markets', {'vs_currency' : 'usd'})
+    w.run()
